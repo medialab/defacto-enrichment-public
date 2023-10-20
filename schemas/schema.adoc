@@ -6,9 +6,6 @@ De Facto JSON-LD Pivot Format
 :url-repo: https://github.com/medialab/defacto-enrichment 
 :toc:
 
-== Enrichment Decision Tree
-image::decision-tree.png[]
-
 == YouTube Channel
 
 === Properties
