@@ -2,9 +2,9 @@
 
 Scripts and documentation for De Facto database enrichment.
 
-## [ClaimReview Schema](schemas/schema.adoc)
-
 ![Minall tests](https://github.com/medialab/minall/actions/workflows/tests.yml/badge.svg)
+
+## [ClaimReview Schema](schemas/schema.adoc)
 
 ## Description
 
