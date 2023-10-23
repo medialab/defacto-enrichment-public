@@ -1,0 +1,13 @@
+= Appearance schema
+De Facto JSON-LD Pivot Format
+:description: Explanation of De Facto appearance schema.
+:sectanchors:
+:hide-uri-scheme:
+:url-repo: https://github.com/medialab/defacto-enrichment 
+:toc:
+
+include::schemas/article.adoc[]
+include::schemas/facebook.adoc[]
+include::schemas/other_social_media.adoc[]
+include::schemas/youtube_channel.adoc[]
+include::schemas/youtube_video.adoc[]
