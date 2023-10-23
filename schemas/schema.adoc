@@ -207,7 +207,7 @@ defacto:locationCreated,Text,Country code representing from where the channel's 
 link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the video's channel.,YouTube API
 |===
 
-==== Interaction Counters
+==== link:https://schema.org/InteractionCounter[Interaction Counters]
 [%header,format=csv]
 |===
 InteractionType,InteractionService,Result,Descirption of UserInteractionCount,Source
