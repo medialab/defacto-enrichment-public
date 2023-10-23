@@ -6,18 +6,56 @@ De Facto JSON-LD Pivot Format
 :url-repo: https://github.com/medialab/defacto-enrichment 
 :toc:
 
+== Article
+
+=== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'Article'.,Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is the result of the domain-name parsing.",URL parsing
+link:https://schema.org/headline[headline],Text,Title of the article.,Scraping
+link:https://schema.org/text[text],Text,Text content of the article.,Scraping
+link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the article was published.,Scraping
+link:https://schema.org/Creator[creator],link:https://schema.org/Creator[Creator],Author of the article.,Buzzsumo API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the article.,Buzzsumo API
+|===
+
+=== link:https://schema.org/InteractionCounter[Interaction Counters]
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Description of UserInteractionCount,Source
+link:https://schema.org/CommentAction[CommentAction],Facebook,None,Number of times Facebook users commented on a post that shared the article.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Facebook,None,Number of times the article was shared on Facebook.,Buzzsumo API
+defacto:EngagementAction,Reddit,None,Number of times the URL was shared on Reddit.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Pinterest,None,Number of times the article was shared on Pinterest.,Buzzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Twitter,None,Number of times the article was shared on Twitter.,Buzzzsumo API
+|===
+
+=== Creator
+
+==== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'defacto:SocialMediaAccount',Default based on URL parsing
+link:https://schema.org/name[name],Text,Name of the article's author.,Buzzsumo API
+|===
+
+
 == Facebook Post
 
 === Properties
 [%header,format=csv]
 |===
 Property,Expected Type,Description,Source
-type,Text,'WebPage'.,Default based on URL parsing
-link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is 'youtube.com'.",URL parsing
+type,Text,'SocialMediaPosting'.,Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is 'facebook.com'.",URL parsing
 link:https://schema.org/identifier[identifier],Text,Facebook's unique identifier for the post.,CrowdTangle API
 link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the post was first published.,CrowdTangle API
 link:https://schema.org/dateModified[dateModified],DateTime,Date and time when the post was last updated.,CrowdTangle API
 link:https://schema.org/text[text],Text,Text content of the post.,CrowdTangle API
+link:https://schema.org/Creator[creator],link:https://schema.org/Creator[Creator],Author of the facebook post.,CrowdTangle API
 link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the post.,CrowdTangle API
 |===
 
@@ -56,6 +94,38 @@ link:https://schema.org/SubscribeAction[SubscribeAction],Facebook,None,Number of
 |===
 
 
+== Other Social Media
+
+=== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'Article'.,Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is the result of the domain-name parsing.",URL parsing
+link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the post was published.,Buzzsumo API
+link:https://schema.org/Creator[creator],link:https://schema.org/Creator[Creator],Author of the post.,Buzzsumo API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the post.,Buzzsumo API
+|===
+
+=== link:https://schema.org/InteractionCounter[Interaction Counters]
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Description of UserInteractionCount,Source
+link:https://schema.org/CommentAction[CommentAction],Facebook,None,Number of times Facebook users commented on a Facebook post that shared a link to the post.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Facebook,None,Number of times the post's link was shared on Facebook.,Buzzsumo API
+defacto:EngagementAction,Reddit,None,Number of times the post's link was shared on Reddit.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Pinterest,None,Number of times the post's link was shared on Pinterest.,Buzzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Twitter,None,Number of times the post's link was shared on Twitter.,Buzzzsumo API
+|===
+
+=== Creator
+
+==== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+link:https://schema.org/identifier[identifier],Text,"If the post came from Twitter, the unique identifier of the account that posted the Tweet.",Buzzsumo API
+|===
 
 
 == YouTube Channel
@@ -105,7 +175,7 @@ link:https://schema.org/abstract[abstract],Text,Brief description of the video.,
 link:https://schema.org/keywords[keywords],Text,Keywords associated with the channel that published the video.,YouTube API
 link:https://schema.org/headline[headline],Text,Title of the video.,YouTube API
 link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the video.,YouTube API
-link:https://schema.org/creator[creator],link:https://schema.org/WebPage[WebPage],"The YouTube channel that published the video. A YouTube channel is type 'WebPage'.",YouTube API
+link:https://schema.org/creator[creator],link:https://schema.org/creator[Creator],"The YouTube channel that published the video. A YouTube channel is type 'WebPage'.",YouTube API
 |===
 
 === Interaction Counters
