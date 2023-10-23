@@ -1,0 +1,55 @@
+== YouTube Video
+
+=== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'VideoObject',Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is 'youtube.com'.",URL parsing
+link:https://schema.org/identifier[identifier],Text,YouTube's unique identifier for the video.,YouTube API
+link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the video was first uploaded to the channel.,YouTube API
+link:https://schema.org/dateModified[dateModified],DateTime,Date and time when the video was re-uploaded.,YouTube API
+link:https://schema.org/countryOfOrigin[countryOfOrigin],Text,Country code representing from where is based the channel that published the video.,YouTube API
+link:https://schema.org/abstract[abstract],Text,Brief description of the video.,YouTube API
+link:https://schema.org/keywords[keywords],Text,Keywords associated with the channel that published the video.,YouTube API
+link:https://schema.org/headline[headline],Text,Title of the video.,YouTube API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the video.,YouTube API
+link:https://schema.org/creator[creator],link:https://schema.org/creator[Creator],"The YouTube channel that published the video. A YouTube channel is type 'WebPage'.",YouTube API
+|===
+
+=== Interaction Counters
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Description of UserInteractionCount,Source
+link:https://schema.org/WatchAction[WatchAction],YouTube,None,Number of times users have viewed the video.,YouTube API
+link:https://schema.org/CommentAction[CommentAction],YouTube,None,Number of times users have commented on the video.,YouTube API
+link:https://schema.org/LikeAction[LikeAction],YouTube,None,Number of times users have liked the video.,YouTube API
+link:https://schema.org/CommentAction[CommentAction],Facebook,None,Number of times Facebook users commented on a post that shared the video.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Facebook,None,Number of times the video was shared on Facebook.,Buzzsumo API
+defacto:EngagementAction,Reddit,None,Number of times the URL was shared on Reddit.,Buzzsumo API
+link:https://schema.org/CommentAction[CommentAction],TikTok,None,Number of times TikTok users commented on a post that shared the YouTube video.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],TikTok,None,Number of times the YouTube video was shared on TikTok.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Twitter,None,Number of times the video was shared on Twitter.,Buzzzsumo API
+|===
+
+=== Creator
+
+==== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'WebPage',Default based on URL parsing
+link:https://schema.org/identifier[identifier],Text,YouTube's unique identifier for the video's channel.,YouTube API
+link:https://schema.org/name[name],Text,Name of the video's channel.,YouTube API
+defacto:dateCreated,DateTime,Date and time when the video's channel was first published.,YouTube API
+defacto:locationCreated,Text,Country code representing from where the channel's content is based.,YouTube API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the video's channel.,YouTube API
+|===
+
+==== Interaction Counters
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Descirption of UserInteractionCount,Source
+link:https://schema.org/SubscribeAction[SubscribeAction],YouTube,None,Number of YouTube accounts subscribed to the video's channel.,YouTube API
+link:https://schema.org/CreateAction[CreateAction],YouTube,VideoObject,Number of videos the video's channel has created.,YouTube API
+|===

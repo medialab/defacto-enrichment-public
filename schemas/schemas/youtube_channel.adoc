@@ -1,0 +1,30 @@
+== YouTube Channel
+
+=== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'WebPage'.,Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is 'youtube.com'.",URL parsing
+link:https://schema.org/identifier[identifier],Text,YouTube's unique identifier for the channel.,YouTube API
+link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the channel was first published.,YouTube API
+link:https://schema.org/countryOfOrigin[countryOfOrigin],Text,Country code representing from where the channel's content is based.,YouTube API
+link:https://schema.org/abstract[abstract],Text,Brief description of the channel.,YouTube API
+link:https://schema.org/keywords[keywords],Text,Keywords associated with the channel.,YouTube API
+link:https://schema.org/headline[headline],Text,Name of the channel.,YouTube API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the channel and/or how many videos the channel published.,YouTube API
+|===
+
+=== link:https://schema.org/InteractionCounter[Interaction Counters]
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Description of UserInteractionCount,Source
+link:https://schema.org/CreateAction[CreateAction],YouTube,VideoObject,Number of videos the channel has created.,YouTube API
+link:https://schema.org/SubscribeAction[SubscribeAction],YouTube,None,Number of YouTube accounts subscribed to the channel.,YouTube API
+link:https://schema.org/CommentAction[CommentAction],Facebook,None,Number of times Facebook users commented on a post that shared the channel's URL.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Facebook,None,Number of times the channel's URL was shared on Facebook.,Buzzsumo API
+defacto:EngagementAction,Reddit,None,Number of times the URL was shared on Reddit.,Buzzsumo API
+link:https://schema.org/CommentAction[CommentAction],TikTok,None,Number of times TikTok users commented on a post that shared the channel's URL.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],TikTok,None,Number of times the channel's URL was shared on TikTok.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Twitter,None,Number of times the channel's URL was shared on Twitter.,Buzzzsumo API
+|===

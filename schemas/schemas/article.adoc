@@ -1,0 +1,35 @@
+== Article
+
+=== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'Article'.,Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is the result of the domain-name parsing.",URL parsing
+link:https://schema.org/headline[headline],Text,Title of the article.,Scraping
+link:https://schema.org/text[text],Text,Text content of the article.,Scraping
+link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the article was published.,Scraping
+link:https://schema.org/Creator[creator],link:https://schema.org/Creator[Creator],Author of the article.,Buzzsumo API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the article.,Buzzsumo API
+|===
+
+=== link:https://schema.org/InteractionCounter[Interaction Counters]
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Description of UserInteractionCount,Source
+link:https://schema.org/CommentAction[CommentAction],Facebook,None,Number of times Facebook users commented on a post that shared the article.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Facebook,None,Number of times the article was shared on Facebook.,Buzzsumo API
+defacto:EngagementAction,Reddit,None,Number of times the URL was shared on Reddit.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Pinterest,None,Number of times the article was shared on Pinterest.,Buzzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Twitter,None,Number of times the article was shared on Twitter.,Buzzzsumo API
+|===
+
+=== Creator
+
+==== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'defacto:SocialMediaAccount',Default based on URL parsing
+link:https://schema.org/name[name],Text,Name of the article's author.,Buzzsumo API
+|===
