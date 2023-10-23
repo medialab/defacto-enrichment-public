@@ -6,6 +6,58 @@ De Facto JSON-LD Pivot Format
 :url-repo: https://github.com/medialab/defacto-enrichment 
 :toc:
 
+== Facebook Post
+
+=== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'WebPage'.,Default based on URL parsing
+link:https://schema.org/isPartOf[isPartOf],URL,"The URL's domain name. The property's 'type' property is 'WebSite' and its 'name' property is 'youtube.com'.",URL parsing
+link:https://schema.org/identifier[identifier],Text,Facebook's unique identifier for the post.,CrowdTangle API
+link:https://schema.org/datePublished[datePublished],DateTime,Date and time when the post was first published.,CrowdTangle API
+link:https://schema.org/dateModified[dateModified],DateTime,Date and time when the post was last updated.,CrowdTangle API
+link:https://schema.org/text[text],Text,Text content of the post.,CrowdTangle API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the post.,CrowdTangle API
+|===
+
+=== link:https://schema.org/InteractionCounter[Interaction Counters]
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Description of UserInteractionCount,Source
+link:https://schema.org/CommentAction[CommentAction],Facebook,None,Number of times Facebook users commented on the post.,CrowdTangle API
+link:https://schema.org/LikeAction[LikeAction],Facebook,None,Number of times the Facebook users liked the post.,CrowdTangle API
+link:https://schema.org/ShareAction[ShareAction],Facebook,None,Number of times the Facebook users shared the post.,CrowdTangle API
+defacto:EngagementAction,Reddit,None,Number of times the URL was shared on Reddit.,Buzzsumo API
+link:https://schema.org/CommentAction[CommentAction],TikTok,None,Number of times TikTok users commented on a post that shared the channel's URL.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],TikTok,None,Number of times the channel's URL was shared on TikTok.,Buzzsumo API
+link:https://schema.org/ShareAction[ShareAction],Twitter,None,Number of times the channel's URL was shared on Twitter.,Buzzzsumo API
+|===
+
+=== Creator
+
+==== Properties
+[%header,format=csv]
+|===
+Property,Expected Type,Description,Source
+type,Text,'defacto:SocialMediaAccount',Default based on URL parsing
+link:https://schema.org/identifier[identifier],Text,Facebook's unique identifier for the post's author.,CrowdTangle API
+link:https://schema.org/name[name],Text,Account name of the post's author.,CrowdTangle API
+defacto:locationCreated,Text,Country code representing from where the post's author says they're based.,CrowdTangle API
+link:https://schema.org/url[url],Text,URL of the post's author.,CrowdTangle API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the post's author's account.,CrowdTangle API
+|===
+
+==== Interaction Counters
+[%header,format=csv]
+|===
+InteractionType,InteractionService,Result,Descirption of UserInteractionCount,Source
+link:https://schema.org/SubscribeAction[SubscribeAction],Facebook,None,Number of Facebook accounts subscribed to the post's author's account.,CrowdTangle API
+|===
+
+
+
+
 == YouTube Channel
 
 === Properties
@@ -82,6 +134,7 @@ link:https://schema.org/identifier[identifier],Text,YouTube's unique identifier 
 link:https://schema.org/name[name],Text,Name of the video's channel.,YouTube API
 defacto:dateCreated,DateTime,Date and time when the video's channel was first published.,YouTube API
 defacto:locationCreated,Text,Country code representing from where the channel's content is based.,YouTube API
+link:https://schema.org/interactionStatistic[interactionStatistic],link:https://schema.org/InteractionCounter[InteractionCounter],Metrics representing how users interact with the video's channel.,YouTube API
 |===
 
 ==== Interaction Counters
@@ -91,3 +144,4 @@ InteractionType,InteractionService,Result,Descirption of UserInteractionCount,So
 link:https://schema.org/SubscribeAction[SubscribeAction],YouTube,None,Number of YouTube accounts subscribed to the video's channel.,YouTube API
 link:https://schema.org/CreateAction[CreateAction],YouTube,VideoObject,Number of videos the video's channel has created.,YouTube API
 |===
+
