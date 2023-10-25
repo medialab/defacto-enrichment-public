@@ -17,10 +17,27 @@ from src.appearance.flatten_appearance import AppearanceFlattener
 from src.shared_content.flatten_shared_content import SharedContentFlattener
 
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.option("--infile")
+@click.option("--outdir")
+def rename(infile, outdir):
+    source = Path(infile)
+    dest_dir = Path(outdir)
+    dest_dir.mkdir(exist_ok=True)
+    new_name = int(round(Path.stat(source).st_mtime, 0))
+    destination = dest_dir.joinpath(f"{new_name}-no-commit.json")
+    destination.write_text(source.read_text())
+
+
+@cli.command()
 @click.argument("commited-files")
 @click.argument("temp-dir")
-def main(commited_files, temp_dir):
+def compile(commited_files, temp_dir):
     db_connection = duckdb.connect(":memory:")
     appearances_table = LinksTable(connection=db_connection)
     shared_content_table = SharedContentTable(connection=db_connection)
@@ -171,4 +188,4 @@ def parse_appearances(
 
 
 if __name__ == "__main__":
-    main()
+    cli()
