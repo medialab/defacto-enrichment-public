@@ -1,6 +1,6 @@
 def parse_interaction_count(
     data: dict, target_service: str, target_action: str
-) -> str | None:
+) -> int | None:
     count_array = data.get("interactionStatistic")
     if isinstance(count_array, list):
         for counter in count_array:
@@ -21,7 +21,7 @@ def parse_interaction_count(
 
 def parse_creator_interaction_count(
     data: dict, service: str, action: str
-) -> str | None:
+) -> int | None:
     creator = data.get("creator")
     if creator:
         return parse_interaction_count(
@@ -42,12 +42,3 @@ def parse_old_interaction_format(counter: dict, target: str) -> str | None:
         return counter.get("object", {}).get("name")
     elif target == "action":
         return counter.get("@type")
-
-
-def build_interaction_format(service: str, interaction_type: str, count: str):
-    return {
-        "@type": "InteractionCounter",
-        "interactionType": interaction_type,
-        "interactionService": {"@type": "WebSite", "name": service},
-        "userInteractionCount": count,
-    }

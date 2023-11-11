@@ -163,3 +163,4 @@ cython_debug/
 data/
 *.sh
 config.json
+.DS_Store

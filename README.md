@@ -4,6 +4,8 @@ Scripts and documentation for De Facto database enrichment.
 
 ![Minall tests](https://github.com/medialab/minall/actions/workflows/tests.yml/badge.svg)
 
+<img src="defacto-enrichment/badge/badge.svg"/>
+
 ## [ClaimReview Schema](schemas/schema.adoc)
 
 The De Facto project's database aggregates fact-checks and makes them available via an RSS feed. Therefore, metadata attached to the fact-checks and the claims they investigate must be in JSON-LD format and follow the ClaimReview and MediaReview schemas, which are commonly used by fact-checkers. We depend as much as possible on the schemas' standards. However, enriched metadata from social media platforms requires the invention of some new ClaimReview properties and types, whose schema is documented on the [AFP-Medialab GitHub repository](https://github.com/AFP-Medialab/defacto-rss/blob/main/Defactor_rss.adoc).

@@ -1,0 +1,3 @@
+from defacto_enrichment.types.appearance import Appearance
+from defacto_enrichment.types.fact_check import FactCheck
+from defacto_enrichment.types.shared_content import SharedContent
