@@ -1,8 +1,9 @@
 name: Collect Metadata
 
 on:
-  schedule:
-    - cron: "00 12 * * *"
+  push
+  # schedule:
+  #   - cron: "00 12 * * *"
 
 jobs:
   update:
@@ -25,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          pip install pybadges
+          pip install pybadges minet
 
       - name: Update JSON data
         run: python defacto-enrichment/badge/generate.py
