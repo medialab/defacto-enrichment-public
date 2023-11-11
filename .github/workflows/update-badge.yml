@@ -37,6 +37,7 @@ jobs:
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
             git pull
-            git commit -m "update badge" defacto-enrichment/badge
+            git add defacto-enrichment/badge
+            git commit -m "update badge"
             git push
           fi
