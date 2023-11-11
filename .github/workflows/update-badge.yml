@@ -1,4 +1,4 @@
-name: Collect Metadata
+name: Update badge
 
 on:
   push
@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install pybadges minet
 
-      - name: Update JSON data
+      - name: Update badge
         run: python defacto-enrichment/badge/generate.py
 
       - name: Commit data
