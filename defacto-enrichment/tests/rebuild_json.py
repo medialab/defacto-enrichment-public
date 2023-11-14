@@ -3,7 +3,6 @@ import sys
 import unittest
 from pathlib import Path
 
-import casanova
 import flatten
 from defacto_enrichment.main import App
 
@@ -31,9 +30,9 @@ class TestEnrich(unittest.TestCase):
 
         assert original_export == new_export
 
-    # def tearDown(self) -> None:
-    #     [file.unlink() for file in DATA_DIR.iterdir() if file.is_file()]
-    #     DATA_DIR.rmdir()
+    def tearDown(self) -> None:
+        [file.unlink() for file in DATA_DIR.iterdir() if file.is_file()]
+        DATA_DIR.rmdir()
 
 
 if __name__ == "__main__":
