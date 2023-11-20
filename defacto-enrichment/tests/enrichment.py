@@ -1,5 +1,4 @@
 import csv
-import sys
 import unittest
 from pathlib import Path
 
@@ -14,36 +13,36 @@ MINALL_OUTPUT.mkdir(exist_ok=True)
 
 
 class TestEnrich(unittest.TestCase):
-    DATABASE_EXPORT: Path | None = None
-
     def setUp(self) -> None:
-        if self.DATABASE_EXPORT:
-            self.app = App(data_dir=DATA_DIR, database_export_file=self.DATABASE_EXPORT)
-        else:
-            self.app = App(data_dir=DATA_DIR)
+        # Initialize the defacto-enrichment app
+        self.app = App(json_object={"data": []}, data_dir=DATA_DIR)
+
+        # Generate flattened mock appearances CSV file
         with open(self.app.appearance_csv, "w") as f:
             writer = csv.writer(f)
             writer.writerows(
                 [
-                    ["fact_check_id", "url"],
-                    ["id1", "url1"],
-                    ["id2", "url1"],
+                    ["fact_check_rating", "clean_url"],
+                    ["1", "url1"],
+                    ["1", "url1"],
                 ]
             )
+        # Generate flattened mock fact-check CSV file
         with open(self.app.fact_check_csv, "w") as f:
             writer = csv.writer(f)
             writer.writerows(
                 [
-                    ["url"],
+                    ["fact_check_rating", "clean_url"],
+                    ["5", "url1"],
                 ]
             )
 
     def test_url_deduplication(self) -> None:
-        infile_count = casanova.count(self.app.appearance_csv)
+        """Test that Minall's enrichment transforms a CSV with 2 identical URLs
+        into a CSV file with 1 URL / 1 row.
+        """
         self.app.enrichment(minall_output=MINALL_OUTPUT, with_shared_content_file=False)
         result_count = casanova.count(self.app.appearance_csv)
-
-        assert infile_count == 2
         assert result_count == 1
 
     def tearDown(self) -> None:
@@ -54,6 +53,4 @@ class TestEnrich(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        TestEnrich.DATABASE_EXPORT = Path(sys.argv.pop())
     unittest.main()

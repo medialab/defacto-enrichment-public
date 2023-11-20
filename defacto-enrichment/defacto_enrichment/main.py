@@ -1,4 +1,5 @@
 import json
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import Dict, List
 
@@ -14,28 +15,20 @@ from rich.panel import Panel
 class App:
     def __init__(
         self,
-        config: str | None = None,
+        json_object: Dict,
         data_dir: Path = DATA_DIR,
-        database_export_file: Path | None = None,
     ) -> None:
-        self.config = config
-        # Export new data from the database
-        if not database_export_file:
-            database_export = get_data()
-            self.database_export_copy = database_export.copy()
-            self.database_export = database_export
-            self.data_items = database_export["data"]
-        else:
-            with open(database_export_file, "r") as f:
-                database_export = json.load(f)
-                if isinstance(database_export, List):
-                    self.data_items = database_export
-                    self.database_export_copy = {"data": database_export}
-                    self.database_export = self.database_export_copy
-                elif isinstance(database_export, Dict) and database_export.get("data"):
-                    self.database_export_copy = database_export.copy()
-                    self.database_export = self.database_export_copy
-                    self.data_items = database_export["data"]
+        """Initially parse and
+
+        Args:
+            json_object (Path | None, optional): Path to JSON export of RSS feed. Defaults to None.
+            data_dir (Path, optional): Path to directory for enriched CSV files. Defaults to DATA_DIR.
+        """
+
+        # Parse JSON export of RSS feed
+        self.database_export = json_object
+        self.database_export_copy = json_object.copy()
+        self.data_items = json_object["data"]
 
         # Manage file paths
         self.appearance_csv = data_dir.joinpath("appearances.csv")
@@ -44,6 +37,8 @@ class App:
         self.new_export_json = data_dir.joinpath("enriched-urls.json")
 
     def flatten_export(self):
+        """Flatten JSON data into 3 CSV files."""
+
         flatten(
             appearance_file=self.appearance_csv,
             fact_check_file=self.fact_check_csv,
@@ -52,14 +47,26 @@ class App:
         )
 
     def enrichment(
-        self, with_shared_content_file: bool = True, minall_output: Path = MINALL_OUTPUT
+        self,
+        config: str | Dict | None = None,
+        with_shared_content_file: bool = True,
+        minall_output: Path = MINALL_OUTPUT,
     ):
+        """Enrich flattened CSV files with imported Minall app.
+
+        Args:
+            config (str | Dict | None, optional): Minet config in YAML file (str), in parsed object (Dict), or in environment variables (None). Defaults to None.
+            with_shared_content_file (bool, optional): Whether to attempt colleciton of shared content. Defaults to True.
+            minall_output (Path, optional): Directory for enriched CSV files. Defaults to MINALL_OUTPUT.
+        """
+
         # For testing purposes, adjust presence of shared_content file
         if with_shared_content_file:
             shared_content_file = str(self.shared_content_csv)
         else:
             shared_content_file = None
 
+        # ---------- APPEARANCE ENRICHMENT ------------ #
         print(
             "\n",
             Panel(
@@ -68,10 +75,9 @@ class App:
                 subtitle="[red]Minall data collection",
             ),
         )
-        # Appearances & shared content
         minall = Minall(
             database=None,
-            config=self.config,
+            config=config,
             output_dir=str(minall_output),
             links_file=str(self.appearance_csv),
             url_col="clean_url",
@@ -83,6 +89,7 @@ class App:
         minall_output.joinpath("links.csv").rename(self.appearance_csv)
         minall_output.joinpath("shared_content.csv").rename(self.shared_content_csv)
 
+        # ----------- FACT CHECK ENRICHMENT ----------- #
         print(
             "\n",
             Panel(
@@ -91,10 +98,9 @@ class App:
                 subtitle="[red]Minall data collection",
             ),
         )
-        # Fact checks
         minall = Minall(
             database=None,
-            config=self.config,
+            config=config,
             output_dir=str(minall_output),
             links_file=str(self.fact_check_csv),
             url_col="clean_url",
@@ -106,6 +112,8 @@ class App:
         minall_output.joinpath("links.csv").rename(self.fact_check_csv)
 
     def rebuild_export(self):
+        """Rebuild JSON from enriched CSV files."""
+
         rebuild(
             database_export=self.database_export,
             appearances_csv=self.appearance_csv,
@@ -117,8 +125,34 @@ class App:
             json.dump(self.database_export, f, indent=4, ensure_ascii=False)
 
 
+def parse_input_data() -> Dict:
+    parser = ArgumentParser()
+    parser.add_argument("--datafile")
+    args = parser.parse_args()
+    datafile = args.datafile
+    if datafile:
+        assert Path(datafile).is_file()
+    # If provided with a file, parse it
+    if datafile:
+        with open(datafile, "r") as f:
+            database_export = json.load(f)
+            if isinstance(database_export, List):
+                database_export = {"data": database_export}
+    # Otherwise, export the most recent data
+    # from the environment variable's endpoint
+    else:
+        database_export = get_data()
+    return database_export
+
+
 def main():
-    app = App()
+    # Parse input data
+    database_export = parse_input_data()
+
+    # Initialize the app with the data and file paths
+    app = App(json_object=database_export)
+
+    # Run the app's 3 steps
     app.flatten_export()
     app.enrichment()
     app.rebuild_export()
