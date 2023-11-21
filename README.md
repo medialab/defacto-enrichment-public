@@ -2,7 +2,8 @@
 
 Scripts and documentation for De Facto database enrichment.
 
-![Minall tests](https://github.com/medialab/minall/actions/workflows/tests.yml/badge.svg)
+![minall tests](https://github.com/medialab/minall/actions/workflows/tests.yml/badge.svg)
+![defacto-enrichment tests](https://github.com/medialab/defacto-enrichment-public/actions/workflows/test.yml/badge.svg)
 
 <img src="defacto-enrichment/badge/badge.svg"/>
 
