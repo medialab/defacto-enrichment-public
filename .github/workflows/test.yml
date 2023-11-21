@@ -1,0 +1,31 @@
+name: defacto-enrichment tests
+
+on:
+  push:
+    paths:
+      - "defacto-enrichment/defacto_enrichment/**"
+      - "defacto-enrichment/tests/**"
+
+jobs:
+  update:
+    name: Run test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install git+https://github.com/medialab/defacto-enrichment-public.git#subdirectory=defacto-enrichment
+
+      - name: Test rebuild
+        run: python -m unittest defacto-enrichment/tests/rebuild_json.py -b

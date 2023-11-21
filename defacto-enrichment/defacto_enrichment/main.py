@@ -1,13 +1,14 @@
+import copy
 import json
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from defacto_enrichment.constants import DATA_DIR, MINALL_OUTPUT
 from defacto_enrichment.flatten import flatten
 from defacto_enrichment.get_data import get_data
 from defacto_enrichment.rebuild import rebuild
-from minall.main import Minall
+from minall.main import Minall  # type: ignore
 from rich import print
 from rich.panel import Panel
 
@@ -26,8 +27,8 @@ class App:
         """
 
         # Parse JSON export of RSS feed
-        self.database_export = json_object
-        self.database_export_copy = json_object.copy()
+        self.json_data = json_object
+        self.json_data_original_copy = copy.deepcopy(json_object)
         self.data_items = json_object["data"]
 
         # Manage file paths
@@ -67,14 +68,6 @@ class App:
             shared_content_file = None
 
         # ---------- APPEARANCE ENRICHMENT ------------ #
-        print(
-            "\n",
-            Panel(
-                f"Appearance metadata input/output:\n\t{self.appearance_csv}\nSharedContent metadata input/output:\n\t{self.shared_content_csv}",
-                title="[bold red]Appearances",
-                subtitle="[red]Minall data collection",
-            ),
-        )
         minall = Minall(
             database=None,
             config=config,
@@ -85,19 +78,17 @@ class App:
             buzzsumo_only=False,
         )
         minall.collect_and_coalesce()
-        minall.export()
-        minall_output.joinpath("links.csv").rename(self.appearance_csv)
-        minall_output.joinpath("shared_content.csv").rename(self.shared_content_csv)
+        appearance_file, shared_content_file = minall.export()
+        print_panel_indicating_file(
+            files=[
+                (appearance_file, self.appearance_csv),
+                (shared_content_file, self.shared_content_csv),
+            ]
+        )
+        appearance_file.rename(self.appearance_csv)
+        shared_content_file.rename(self.shared_content_csv)
 
         # ----------- FACT CHECK ENRICHMENT ----------- #
-        print(
-            "\n",
-            Panel(
-                f"Fact-check metadata input/output:\n\t{self.fact_check_csv}",
-                title="[bold red]Fact Checks",
-                subtitle="[red]Minall data collection",
-            ),
-        )
         minall = Minall(
             database=None,
             config=config,
@@ -108,21 +99,22 @@ class App:
             buzzsumo_only=True,
         )
         minall.collect_and_coalesce()
-        minall.export()
-        minall_output.joinpath("links.csv").rename(self.fact_check_csv)
+        fact_check_file, _ = minall.export()
+        print_panel_indicating_file(files=[(fact_check_file, self.fact_check_csv)])
+        fact_check_file.rename(self.fact_check_csv)
 
     def rebuild_export(self):
         """Rebuild JSON from enriched CSV files."""
 
         rebuild(
-            database_export=self.database_export,
+            database_export=self.json_data,
             appearances_csv=self.appearance_csv,
             shared_content_csv=self.shared_content_csv,
             fact_check_csv=self.fact_check_csv,
         )
         print(self.new_export_json)
         with open(self.new_export_json, "w") as f:
-            json.dump(self.database_export, f, indent=4, ensure_ascii=False)
+            json.dump(self.json_data, f, indent=4, ensure_ascii=False)
 
 
 def parse_input_data() -> Dict:
@@ -143,6 +135,14 @@ def parse_input_data() -> Dict:
     else:
         database_export = get_data()
     return database_export
+
+
+def print_panel_indicating_file(files: List[Tuple[Path, Path]]):
+    panel_text = "\n".join(
+        f"{t[0].relative_to(Path.cwd())} -> {t[1].relative_to(Path.cwd())}"
+        for t in files
+    )
+    print(Panel(panel_text, title="Rewriting minall enrichment to out-file"))
 
 
 def main():

@@ -8,41 +8,32 @@ from defacto_enrichment.types import Appearance, FactCheck, SharedContent
 def rebuild_appearance_schemas(
     database_export: Dict, appearances_csv: Path, shared_content_csv: Path
 ) -> Dict:
-    appearance_url_index = {}
+    index_by_url = {}
     with open(appearances_csv) as f:
         reader = csv.DictReader(f)
         for row in reader:
             record = Appearance.from_csv_dict_row(row)
-            appearance_url_index.update(
-                {record.exact_url: {"appearance": None, "sharedContent": []}}
-            )
-            appearance_url_index[record.exact_url]["appearance"] = record.to_json()
+            index_by_url[record.exact_url] = record.to_json()
 
     with open(shared_content_csv) as f:
         reader = csv.DictReader(f)
         for row in reader:
             record = SharedContent.from_csv_dict_row(row)
-            appearance_url_index[record.post_url]["sharedContent"].append(
-                record.to_json()
-            )
+            index_by_url[record.post_url].update({"sharedContent": record.to_json()})
 
     for fact_check in database_export["data"]:
         claim_review = fact_check.get("claim-review")
         if claim_review:
-            appearance = claim_review.get("itemReviewed", {}).get("appearance")
-            if isinstance(appearance, Dict):
-                if (
-                    appearance.get("exact_url")
-                    and appearance["exact_url"] in appearance_url_index
-                ):
-                    appearance.update(appearance_url_index[appearance["exact_url"]])
-            elif isinstance(appearance, List):
-                for app in appearance:
-                    if (
-                        app.get("exact_url")
-                        and app["exact_url"] in appearance_url_index
-                    ):
-                        app = appearance_url_index["exact_url"]
+            appearance_value = claim_review.get("itemReviewed", {}).get("appearance")
+            if isinstance(appearance_value, Dict):
+                appearance_url = appearance_value.get("url")
+                if appearance_url and appearance_url in index_by_url:
+                    appearance_value.update(index_by_url[appearance_url])
+            elif isinstance(appearance_value, List):
+                for appearance in appearance_value:
+                    appearance_url = appearance.get("url")
+                    if appearance_url and appearance_url in index_by_url:
+                        appearance.update(index_by_url[appearance_url])
 
     return database_export
 
