@@ -11,7 +11,7 @@ def get_data() -> Dict:
         with Progress(
             TextColumn("{task.description}"), SpinnerColumn(), TimeElapsedColumn()
         ) as progress:
-            progress.add_task("[bold yellow]Exporting data from De Facto")
+            progress.add_task("[bold yellow]Retrieving data")
             response = requests.get(endpoint)
             response.raise_for_status()
             response = response.json()
