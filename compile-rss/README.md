@@ -24,7 +24,7 @@ Options:
 
 ### Example
 
-In a subdirectory, `./committed-data`, you want to save the committed versions of prior enrichments. The old enrichments were committed in a git repository, `git-repo/`, outside the current working directory (CWD). See the example architecture below.
+Let's say you want to save the committed versions of a file, such as the `enriched-urls.json` file that `defacto-enrichment` generates. The versions were committed in a git repository outside your current working directory (CWD). See the example architecture below.
 
 ```console
 .
@@ -36,7 +36,7 @@ In a subdirectory, `./committed-data`, you want to save the committed versions o
     |___committed-data/
 ```
 
-To run the command for the example scenario, input the following information for the options.
+To run save the `enriched-urls.json` file's committed versions for this example scenario, assign the following information to the `get-history` options:
 
 - `--output` : `./versions`
 - `--repo` : `../git-repo`
