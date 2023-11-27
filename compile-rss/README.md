@@ -58,3 +58,16 @@ $ defcomp get-history --output ./versions --repo ../git-repo --relative-file-nam
         |___2023-05-09_562034382306237e3ea477e7af92fa38abbccb86.json
         |___2023-05-10_8c127f5aade58665b43e289cabf40e5c17202b64.json
 ```
+
+# Add data version to compiled directory
+
+To manually add a single file to a directory of compiled data versions, use the command `defcomp add --output DIRECTORY FILE`.
+
+```console
+Usage: defcomp add [OPTIONS] FILE
+
+Options:
+  --output DIRECTORY  Path to the directory in which to write all the target
+                      files' committed versions.
+  --help              Show this message and exit.
+```
