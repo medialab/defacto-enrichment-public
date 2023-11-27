@@ -50,15 +50,11 @@ def rebuild_fact_check_schema(database_export: Dict, fact_check_csv: Path) -> Di
         claim_review = fact_check.get("claim-review")
         if (
             claim_review
-            and claim_review.get("exact_url")
-            and fact_check_url_index.get(claim_review["exact_url"])
+            and claim_review.get("url")
+            and fact_check_url_index.get(claim_review["url"])
         ):
             claim_review.update(
-                {
-                    "interactionStatistics": fact_check_url_index[
-                        claim_review["exact_url"]
-                    ]
-                }
+                {"interactionStatistics": fact_check_url_index[claim_review["url"]]}
             )
 
     return database_export
@@ -82,3 +78,29 @@ def rebuild(
         database_export=database_export, fact_check_csv=fact_check_csv
     )
     return database_export
+
+
+if __name__ == "__main__":
+    import json
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("--export")
+    parser.add_argument("--appearances")
+    parser.add_argument("--shared-content")
+    parser.add_argument("--fact-checks")
+    parser.add_argument("--outfile")
+    args = parser.parse_args()
+
+    with open(args.export, "r") as f:
+        exported_data = json.load(f)
+
+    data = rebuild(
+        database_export=exported_data,
+        appearances_csv=args.appearances,
+        shared_content_csv=args.shared_content,
+        fact_check_csv=args.fact_checks,
+    )
+
+    with open(args.outfile, "w") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)

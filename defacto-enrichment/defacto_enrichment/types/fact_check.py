@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from casanova import TabularRecord
-from defacto_enrichment.flatten.utils import parse_interaction_count
+from defacto_enrichment.types.utils import parse_interaction_count
 from defacto_enrichment.utils import build_interaction_stats
 from ural import is_url
 

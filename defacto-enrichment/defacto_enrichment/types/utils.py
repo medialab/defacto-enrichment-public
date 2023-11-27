@@ -1,5 +1,8 @@
+from typing import Dict
+
+
 def parse_interaction_count(
-    data: dict, target_service: str, target_action: str
+    data: Dict, target_service: str, target_action: str
 ) -> int | None:
     count_array = data.get("interactionStatistic")
     if isinstance(count_array, list):
@@ -20,7 +23,7 @@ def parse_interaction_count(
 
 
 def parse_creator_interaction_count(
-    data: dict, service: str, action: str
+    data: Dict, service: str, action: str
 ) -> int | None:
     creator = data.get("creator")
     if creator:
@@ -30,14 +33,14 @@ def parse_creator_interaction_count(
 
 
 # DELETE EVENTUALLY
-def parse_old_creator_date_created_format(data: dict) -> str | None:
+def parse_old_creator_date_created_format(data: Dict) -> str | None:
     creator_action = data.get("creator", {}).get("action", {})
     if creator_action.get("@type") == "CreateAction":
         return creator_action.get("result", {}).get("dateCreated")
 
 
 # DELETE EVENTUALLY
-def parse_old_interaction_format(counter: dict, target: str) -> str | None:
+def parse_old_interaction_format(counter: Dict, target: str) -> str | None:
     if target == "service":
         return counter.get("object", {}).get("name")
     elif target == "action":

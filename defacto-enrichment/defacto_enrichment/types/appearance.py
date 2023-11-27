@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from casanova import TabularRecord
-from defacto_enrichment.flatten.utils import (
+from defacto_enrichment.types.utils import (
     parse_creator_interaction_count,
     parse_interaction_count,
 )
