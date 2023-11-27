@@ -1,3 +1,10 @@
+# Table of contents
+
+- [Install](#install)
+- [Gather historic versions of dataset](#gather-historic-versions-of-data)
+  - [Git commits](#save-versions-committed-to-git-repository)
+  - [Stand-alone file](#add-single-version-of-data-to-compiled-directory)
+
 # Install
 
 Activate a virtual environment with Python version 3.11 and install the CLI.
@@ -6,7 +13,9 @@ Activate a virtual environment with Python version 3.11 and install the CLI.
 $ pip install git+https://github.com/medialab/defacto-enrichment-public.git#subdirectory=compile-rss
 ```
 
-# Save committed versions of data
+# Gather historic versions of data
+
+## Save versions committed to Git repository
 
 Use the command `git-history` to save committed versions of prior URL enrichments to a folder, where each version is written to a file whose name is composed of (a) the date of the commit and (b) the commit's ID.
 
@@ -59,7 +68,7 @@ $ defcomp get-history --output ./versions --repo ../git-repo --relative-file-nam
         |___2023-05-10_8c127f5aade58665b43e289cabf40e5c17202b64.json
 ```
 
-# Add data version to compiled directory
+## Add single version of data to compiled directory
 
 To manually add a single file to a directory of compiled data versions, use the command `defcomp add --output DIRECTORY FILE`.
 
