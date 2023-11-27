@@ -1,3 +1,5 @@
+# `defcomp` De Facto enrichment compiler
+
 This tool is designed to solve a problem. One goal of the `defacto-enrichment` workflow is, thanks to an in-memory SQL database, to retain previous enrichments even when a URL has been deleted or metadata is otherwise no longer available. For this reason, a later iteration of an enrichment might contain less information than a previous iteration.
 
 When you run the `defacto-enrichment` workflow on a set of claim-reviews, you generate a file, `./data/enriched-urls.json'. When that set of claim-reviews is updated regularly and you run the `defacto-enrichment` workflow regularly, you generate a set of files. Ideally, the updated set of claim-reviews would have the previous run's enrichments in them, but this is not always possible. For example, when you're collecting a set of claim-reviews from a source that you cannot modify, you have to save the iterations of the enrichment.
