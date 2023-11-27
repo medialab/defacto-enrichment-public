@@ -45,3 +45,16 @@ To run the command for the example scenario, input the following information for
 ```console
 $ defcomp get-history --output ./versions --repo ../git-repo --relative-file-name data/enriched-urls.json
 ```
+
+```console
+.
+|___git-repo/
+    |___main.py
+    |___data/
+        |___enriched-urls.jon
+|___compile-history/ (CWD)
+    |___committed-data/
+        |___2023-05-08_0943ad63bdf7766045d8c2b811cd945923feb2ee.json
+        |___2023-05-09_562034382306237e3ea477e7af92fa38abbccb86.json
+        |___2023-05-10_8c127f5aade58665b43e289cabf40e5c17202b64.json
+```
