@@ -10,14 +10,14 @@ setup(
     python_requires=">=3.11",
     packages=find_packages(exclude=["schemas"]),
     install_requires=[
-        "minall @ git+https://github.com/medialab/minall.git@v0.0.6",
+        "minall @ git+https://github.com/medialab/minall.git@v0.0.12",
         "defacto-enrichment @ git+https://github.com/medialab/defacto-enrichment-public.git#subdirectory=defacto-enrichment",
         "requests==2.31.0",
         "GitPython==3.1.40",
         "click==8.1.7",
     ],
     entry_points={
-        "console_scripts": ["compile-rss=src.cli:cli"],
+        "console_scripts": ["defcomp=src.cli:cli"],
     },
     zip_safe=True,
 )
