@@ -1,10 +1,10 @@
 # `defcomp` De Facto enrichment compiler
 
-This tool is designed to solve a problem. One goal of the `defacto-enrichment` workflow is, thanks to an in-memory SQL database, to retain previous enrichments even when a URL has been deleted or metadata is otherwise no longer available. For this reason, a later iteration of an enrichment might contain less information than a previous iteration.
+This tool is designed to solve a problem. One goal of the `defacto-enrichment` workflow is to retain previously collected metadata even when a URL has been deleted or metadata is otherwise no longer available. For this reason, an earlier iteration of a dataset's enrichment might contain more information than a later iteration.
 
-When you run the `defacto-enrichment` workflow on a set of claim-reviews, you generate a file, `./data/enriched-urls.json`. When that set of claim-reviews is updated regularly and you run the `defacto-enrichment` workflow regularly, you generate a set of files. Ideally, the updated set of claim-reviews would have the previous run's enrichments in them, but this is not always possible. For example, when you're collecting a set of claim-reviews from a source that you cannot modify, you have to save the iterations of the enrichment.
+When you run the `defacto-enrichment` workflow on a set of claim-reviews, you generate a file, `./data/enriched-urls.json`. When that set of claim-reviews is updated regularly and you run the `defacto-enrichment` workflow regularly, you generate a set of enrichment files. Ideally, that regularly updated set of claim-reviews would have the previous run's enrichments in them, but this is not always possible. For example, when you're collecting a set of claim-reviews from a source that you cannot modify, you have to save the iterations of the enrichment.
 
-Thus the problem to solve is compiling a set of enrichments, generated over time, retaining all information that was ever available and recorded in an out-file, such as `./data/enriched-urls.json`.
+Thus the problem to solve is compiling a set of enrichemnt files, generated over time, retaining all the information that was ever available and recorded in `./data/enriched-urls.json`.
 
 ---
 
