@@ -2,22 +2,18 @@ import sqlite3
 from pathlib import Path
 
 from src.compiler import Compiler
-
-TEMP_DIR = Path(__file__).parent.joinpath("tmp")
-TEMP_APPEARANCES = TEMP_DIR.joinpath("appearances.csv")
-TEMP_FACT_CHECKS = TEMP_DIR.joinpath("fact_checks.csv")
-TEMP_SHARED_CONTENT = TEMP_DIR.joinpath("shared_content.csv")
-DB = TEMP_DIR.joinpath("sqlite.db")
+from src.constants import TEMP_APPEARANCES, TEMP_FACT_CHECKS, TEMP_SHARED_CONTENT
 
 
 def combine_files(directory: str, output: str):
     # Set up
-    connection = sqlite3.connect(DB)
+    connection = sqlite3.connect(":memory:")
     compiler = Compiler(connection)
 
     # Combine files
     for file in Path(directory).iterdir():
         print("\n", file)
+
         # call Compiler -> flatten -> coalesce
         compiler(file)
 

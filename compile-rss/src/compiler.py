@@ -1,18 +1,15 @@
-import json
 from pathlib import Path
 from sqlite3 import Connection
-from typing import Dict, List
 
-from defacto_enrichment.flatten import flatten
 from defacto_enrichment.types import Appearance, FactCheck, SharedContent
-
+from src.constants import (
+    TEMP_APPEARANCES,
+    TEMP_DIR,
+    TEMP_FACT_CHECKS,
+    TEMP_SHARED_CONTENT,
+)
+from src.flattener import flattener
 from src.table import Table
-
-TEMP_DIR = Path(__file__).parent.joinpath("tmp")
-TEMP_APPEARANCES = TEMP_DIR.joinpath("appearances.csv")
-TEMP_FACT_CHECKS = TEMP_DIR.joinpath("fact_checks.csv")
-TEMP_SHARED_CONTENT = TEMP_DIR.joinpath("shared_content.csv")
-DB = TEMP_DIR.joinpath("sqlite.db")
 
 
 class Compiler:
@@ -52,20 +49,3 @@ class Compiler:
     def export(self, output: str):
         output_dir = Path(output)
         output_dir.mkdir(exist_ok=True)
-
-
-def flattener(file: Path) -> None:
-    with open(file, "r") as f:
-        loaded_json = json.load(f)
-        if isinstance(loaded_json, List):
-            data = loaded_json
-        elif isinstance(loaded_json, Dict) and loaded_json.get("data"):
-            data = loaded_json["data"]
-        else:
-            return
-        flatten(
-            appearance_file=TEMP_APPEARANCES,
-            fact_check_file=TEMP_FACT_CHECKS,
-            content_file=TEMP_SHARED_CONTENT,
-            data=data,
-        )
