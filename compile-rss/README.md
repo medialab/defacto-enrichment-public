@@ -36,7 +36,7 @@ Let's say you want to save the committed versions of a file, such as the `enrich
     |___committed-data/
 ```
 
-To run save the `enriched-urls.json` file's committed versions for this example scenario, assign the following information to the `get-history` options:
+To save all the committed versions of `enriched-urls.json` in this example scenario, assign the following information to the `get-history` options:
 
 - `--output` : `./versions`
 - `--repo` : `../git-repo`
