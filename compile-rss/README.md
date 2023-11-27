@@ -1,3 +1,11 @@
+This tool is designed to solve a problem. One goal of the `defacto-enrichment` workflow is, thanks to an in-memory SQL database, to retain previous enrichments even when a URL has been deleted or metadata is otherwise no longer available. For this reason, a later iteration of an enrichment might contain less information than a previous iteration.
+
+When you run the `defacto-enrichment` workflow on a set of claim-reviews, you generate a file, `./data/enriched-urls.json'. When that set of claim-reviews is updated regularly and you run the `defacto-enrichment` workflow regularly, you generate a set of files. Ideally, the updated set of claim-reviews would have the previous run's enrichments in them, but this is not always possible. For example, when you're collecting a set of claim-reviews from a source that you cannot modify, you have to save the iterations of the enrichment.
+
+Thus the problem to solve is compiling a set of enrichments, generated over time, retaining all information that was ever available and recorded in an out-file.
+
+---
+
 # Table of contents
 
 - [Install](#install)
@@ -17,7 +25,7 @@ $ pip install git+https://github.com/medialab/defacto-enrichment-public.git#subd
 
 ## Save versions committed to Git repository
 
-Use the command `git-history` to save committed versions of prior URL enrichments to a folder, where each version is written to a file whose name is composed of (a) the date of the commit and (b) the commit's ID.
+Use the command `git-history` to iterate through all versions of a file committed to a git repository and save them inside a folder. Each version is written to a file whose name is composed of (a) the date of the commit and (b) the commit's ID.
 
 ```console
 Usage: defcomp get-history [OPTIONS]
@@ -83,7 +91,7 @@ Options:
 
 ### Example
 
-Let's say you have a file you generated with the `defacto-enrichment` workflow, `enriched-urls.json`, and you want to add that to a directory you're curating of historic versions of the your dataset's enrichment, `./committed-data`.
+Let's say you have a file you generated with the `defacto-enrichment` workflow, `enriched-urls.json`, and you want to add that to a directory you're curating of historic versions of your dataset's enrichment, `./committed-data`.
 
 ```console
 .
