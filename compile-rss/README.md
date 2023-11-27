@@ -71,3 +71,30 @@ Options:
                       files' committed versions.
   --help              Show this message and exit.
 ```
+
+### Example
+
+Let's say you have a file you generated with the `defacto-enrichment` workflow, `enriched-urls.json`, and you want to add that to a directory you're curating of historic versions of the your dataset's enrichment, `./committed-data`.
+
+```console
+.
+|___data/
+    |___enriched-urls.jon
+|___compile-history/ (CWD)
+    |___committed-data/
+```
+
+To add the file to the directory with the same naming convention as used in the command `defcomp get-history`, run the following command:
+
+```console
+$ defcomp add --output ./committed-data ../data/enriched-urls.json
+```
+
+```console
+.
+|___data/
+    |___enriched-urls.jon
+|___compile-history/ (CWD)
+    |___committed-data/
+        |___2023-11-04_enriched-urls.json
+```
