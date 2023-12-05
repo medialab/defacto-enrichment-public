@@ -1,12 +1,11 @@
 import copy
 import json
-from argparse import ArgumentParser
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 from defacto_enrichment.constants import DATA_DIR, MINALL_OUTPUT
 from defacto_enrichment.flatten import flatten
-from defacto_enrichment.get_data import get_data
+from defacto_enrichment.get_data import parse_input_data
 from defacto_enrichment.rebuild import rebuild
 from minall.main import Minall  # type: ignore
 from rich import print
@@ -117,26 +116,6 @@ class App:
             json.dump(self.json_data, f, indent=4, ensure_ascii=False)
 
 
-def parse_input_data() -> Dict:
-    parser = ArgumentParser()
-    parser.add_argument("--datafile")
-    args = parser.parse_args()
-    datafile = args.datafile
-    if datafile:
-        assert Path(datafile).is_file()
-    # If provided with a file, parse it
-    if datafile:
-        with open(datafile, "r") as f:
-            database_export = json.load(f)
-            if isinstance(database_export, List):
-                database_export = {"data": database_export}
-    # Otherwise, export the most recent data
-    # from the environment variable's endpoint
-    else:
-        database_export = get_data()
-    return database_export
-
-
 def print_panel_indicating_file(files: List[Tuple[Path, Path]]):
     panel_text = "\n".join(
         f"{t[0].relative_to(Path.cwd())} -> {t[1].relative_to(Path.cwd())}"
@@ -149,13 +128,14 @@ def main():
     # Parse input data
     database_export = parse_input_data()
 
-    # Initialize the app with the data and file paths
-    app = App(json_object=database_export)
+    if database_export:
+        # Initialize the app with the data and file paths
+        app = App(json_object=database_export)
 
-    # Run the app's 3 steps
-    app.flatten_export()
-    app.enrichment()
-    app.rebuild_export()
+        # Run the app's 3 steps
+        app.flatten_export()
+        app.enrichment()
+        app.rebuild_export()
 
 
 if __name__ == "__main__":
