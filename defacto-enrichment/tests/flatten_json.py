@@ -5,7 +5,7 @@ from pathlib import Path
 from defacto_enrichment.main import App
 
 
-class TestRebuild(unittest.TestCase):
+class TestFlatten(unittest.TestCase):
     def setUp(self):
         self.TEST_DATA_DIR = Path(__file__).parent.joinpath("data")
         self.TEST_DATA_DIR.mkdir(exist_ok=True)
@@ -17,8 +17,8 @@ class TestRebuild(unittest.TestCase):
         self.app.flatten_export()
 
     def tearDown(self) -> None:
-        # [file.unlink() for file in self.TEST_DATA_DIR.iterdir() if file.is_file()]
-        # self.TEST_DATA_DIR.rmdir()
+        [file.unlink() for file in self.TEST_DATA_DIR.iterdir() if file.is_file()]
+        self.TEST_DATA_DIR.rmdir()
         [file.unlink() for file in self.TEST_MINALL_OUTPUT.iterdir() if file.is_file()]
         self.TEST_MINALL_OUTPUT.rmdir()
 
