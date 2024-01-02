@@ -22,18 +22,21 @@ def rebuild_appearance_schemas(
             index_by_url[record.post_url].update({"sharedContent": record.to_json()})
 
     for fact_check in database_export["data"]:
-        claim_review = fact_check.get("claim-review")
-        if claim_review:
-            appearance_value = claim_review.get("itemReviewed", {}).get("appearance")
-            if isinstance(appearance_value, Dict):
-                appearance_url = appearance_value.get("url")
-                if appearance_url and appearance_url in index_by_url:
-                    appearance_value.update(index_by_url[appearance_url])
-            elif isinstance(appearance_value, List):
-                for appearance in appearance_value:
-                    appearance_url = appearance.get("url")
+        items = fact_check.get("claim-review")
+        # {"claim-review": [{"itemReviewed": {...}}, {"itemReviewed": {...}}, ...]}
+        for item in items:
+            if isinstance(item, Dict):
+                item_reviewed = item["itemReviewed"]
+                appearance_value = item_reviewed.get("appearance")
+                if isinstance(appearance_value, Dict):
+                    appearance_url = appearance_value.get("url")
                     if appearance_url and appearance_url in index_by_url:
-                        appearance.update(index_by_url[appearance_url])
+                        appearance_value.update(index_by_url[appearance_url])
+                elif isinstance(appearance_value, List):
+                    for appearance in appearance_value:
+                        appearance_url = appearance.get("url")
+                        if appearance_url and appearance_url in index_by_url:
+                            appearance.update(index_by_url[appearance_url])
 
     return database_export
 
@@ -47,15 +50,20 @@ def rebuild_fact_check_schema(database_export: Dict, fact_check_csv: Path) -> Di
             fact_check_url_index[record.exact_url] = record.to_json()
 
     for fact_check in database_export["data"]:
-        claim_review = fact_check.get("claim-review")
-        if (
-            claim_review
-            and claim_review.get("url")
-            and fact_check_url_index.get(claim_review["url"])
-        ):
-            claim_review.update(
-                {"interactionStatistics": fact_check_url_index[claim_review["url"]]}
-            )
+        items = fact_check.get("claim-review")
+        for item_reviewed in items:
+            if (
+                item_reviewed
+                and item_reviewed.get("url")
+                and fact_check_url_index.get(item_reviewed["url"])
+            ):
+                item_reviewed.update(
+                    {
+                        "interactionStatistics": fact_check_url_index[
+                            item_reviewed["url"]
+                        ]
+                    }
+                )
 
     return database_export
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from defacto_enrichment.constants import DATA_DIR, MINALL_OUTPUT
-from defacto_enrichment.flatten import flatten
+from defacto_enrichment.flatten import flatten, normalized_fact_checks
 from defacto_enrichment.get_data import parse_input_data
 from defacto_enrichment.rebuild import rebuild
 from minall.main import Minall  # type: ignore
@@ -28,7 +28,7 @@ class App:
         # Parse JSON export of RSS feed
         self.json_data = json_object
         self.json_data_original_copy = copy.deepcopy(json_object)
-        self.data_items = json_object["data"]
+        self.data_items = normalized_fact_checks(json_object["data"])
 
         # Manage file paths
         self.appearance_csv = data_dir.joinpath("appearances.csv")
@@ -104,14 +104,14 @@ class App:
 
     def rebuild_export(self):
         """Rebuild JSON from enriched CSV files."""
-
+        # Use normalized data when rebuilding
+        self.json_data["data"] = self.data_items
         rebuild(
             database_export=self.json_data,
             appearances_csv=self.appearance_csv,
             shared_content_csv=self.shared_content_csv,
             fact_check_csv=self.fact_check_csv,
         )
-        print(self.new_export_json)
         with open(self.new_export_json, "w") as f:
             json.dump(self.json_data, f, indent=4, ensure_ascii=False)
 

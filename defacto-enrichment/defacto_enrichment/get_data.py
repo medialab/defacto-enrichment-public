@@ -60,8 +60,9 @@ def rss2json(rss_file):
     return {"data": data}
 
 
-def get_from_endpoint_data() -> Dict:
-    endpoint = os.environ["ENDPOINT"]
+def get_from_endpoint_data(endpoint: str | None = None) -> Dict:
+    if not endpoint:
+        endpoint = os.environ["ENDPOINT"]
     try:
         with Progress(
             TextColumn("{task.description}"), SpinnerColumn(), TimeElapsedColumn()
@@ -77,3 +78,14 @@ def get_from_endpoint_data() -> Dict:
             return response
         else:
             raise KeyError
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("endpoint")
+    parser.add_argument("output")
+    args = parser.parse_args()
+    data = get_from_endpoint_data(args.endpoint)
+    with open(args.output, "w") as f:
+        print(data)
+        json.dump(data, f, indent=4, ensure_ascii=False)

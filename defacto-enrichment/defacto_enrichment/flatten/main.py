@@ -1,9 +1,39 @@
+import copy
 import csv
 from pathlib import Path
 from typing import Dict, List
 
 from defacto_enrichment.flatten.context import Writers
 from defacto_enrichment.types import Appearance, FactCheck, SharedContent
+
+
+def normalized_fact_checks(data: List[Dict]) -> List[Dict]:
+    normalized_data = copy.deepcopy(data)
+
+    # Normalize the value of claim-review to be a List
+    for fact_check in normalized_data:
+        claim_review = fact_check.get("claim-review")
+        if isinstance(claim_review, str):
+            claim_review = []
+        elif isinstance(claim_review, Dict):
+            claim_review = [claim_review]
+        else:
+            claim_review = claim_review
+        fact_check["claim-review"] = claim_review
+
+        if isinstance(claim_review, List):
+            # Normalize the value of appearance in itemReviewed
+            for items in claim_review:
+                item_reviewed = items.get("itemReviewed")
+                if isinstance(item_reviewed, Dict):
+                    appearance = item_reviewed.get("appearance")
+                    if isinstance(appearance, str):
+                        appearance = {"url": appearance.strip()}
+                    else:
+                        appearance = appearance
+                    item_reviewed["appearance"] = appearance
+
+    return normalized_data
 
 
 def flatten(
@@ -15,42 +45,45 @@ def flatten(
         for fact_check in data:
             progress.advance(t)
 
-            claim_review = fact_check.get("claim-review")
-            if not claim_review:
+            claim_reviews = fact_check.get("claim-review")
+            if not claim_reviews:
                 continue
 
-            fact_check_rating = claim_review.get("reviewRating", {}).get("ratingValue")
-
-            if isinstance(claim_review, Dict):
-                try:
-                    record = FactCheck.from_json(
-                        fact_check_rating=fact_check_rating, item=claim_review
-                    )
-                except Exception as e:
-                    from pprint import pprint
-
-                    pprint(claim_review)
-                    raise e
-                fact_check_writer.writerow(record.as_csv_dict_row())
-
-            appearance = claim_review.get("itemReviewed", {}).get("appearance")
-
-            if isinstance(appearance, Dict):
-                parse_appearance(
-                    appearance=appearance,
-                    appearance_writer=appearance_writer,
-                    shared_content_writer=content_writer,
-                    fact_check_rating=fact_check_rating,
+            for item_reviewed in claim_reviews:
+                fact_check_rating = item_reviewed.get("reviewRating", {}).get(
+                    "ratingValue"
                 )
 
-            elif isinstance(appearance, List):
-                for app in appearance:
+                if isinstance(item_reviewed, Dict):
+                    try:
+                        record = FactCheck.from_json(
+                            fact_check_rating=fact_check_rating, item=item_reviewed
+                        )
+                    except Exception as e:
+                        from pprint import pprint
+
+                        pprint(item_reviewed)
+                        raise e
+                    fact_check_writer.writerow(record.as_csv_dict_row())
+
+                appearance = item_reviewed.get("itemReviewed", {}).get("appearance")
+
+                if isinstance(appearance, Dict):
                     parse_appearance(
-                        appearance=app,
+                        appearance=appearance,
                         appearance_writer=appearance_writer,
                         shared_content_writer=content_writer,
                         fact_check_rating=fact_check_rating,
                     )
+
+                elif isinstance(appearance, List):
+                    for app in appearance:
+                        parse_appearance(
+                            appearance=app,
+                            appearance_writer=appearance_writer,
+                            shared_content_writer=content_writer,
+                            fact_check_rating=fact_check_rating,
+                        )
 
 
 def parse_appearance(
