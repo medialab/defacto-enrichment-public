@@ -29,3 +29,6 @@ jobs:
 
       - name: Test rebuild
         run: python -m unittest defacto-enrichment/tests/rebuild_json.py -b
+
+      - name: Test flatten
+        run: python -m unittest defacto-enrichment/tests/flatten_json.py -b

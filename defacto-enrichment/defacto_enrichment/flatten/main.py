@@ -64,7 +64,10 @@ def flatten(
 
                         pprint(item_reviewed)
                         raise e
-                    fact_check_writer.writerow(record.as_csv_dict_row())
+
+                    # If no fact-check URL, do not write record to minall-destined CSV file
+                    if record.clean_url:
+                        fact_check_writer.writerow(record.as_csv_dict_row())
 
                 appearance = item_reviewed.get("itemReviewed", {}).get("appearance")
 
