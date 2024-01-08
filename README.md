@@ -14,5 +14,5 @@ The De Facto project's database aggregates fact-checks and makes them available 
 ## Enrichment procedure
 
 The enrichment relies on the Python library [`minall`](https://github.com/medialab/minall), which leverages the many platform-specific API client wrappers of [`minet`](https://github.com/medialab/minet) to collect data about appearances of claims in the database.
-```
+
 See documentation here: [https://medialab.github.io/minall/](https://medialab.github.io/minall/)
