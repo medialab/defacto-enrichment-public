@@ -43,6 +43,7 @@ def flatten(
         appearance_writer, content_writer, fact_check_writer, progress = context
         t = progress.add_task(description="[bold blue]Flatten", total=len(data))
         for fact_check in data:
+            fact_check_rating = ""
             progress.advance(t)
 
             claim_reviews = fact_check.get("claim-review")
@@ -53,21 +54,6 @@ def flatten(
                 fact_check_rating = item_reviewed.get("reviewRating", {}).get(
                     "ratingValue"
                 )
-
-                if isinstance(item_reviewed, Dict):
-                    try:
-                        record = FactCheck.from_json(
-                            fact_check_rating=fact_check_rating, item=item_reviewed
-                        )
-                    except Exception as e:
-                        from pprint import pprint
-
-                        pprint(item_reviewed)
-                        raise e
-
-                    # If no fact-check URL, do not write record to minall-destined CSV file
-                    if record.clean_url:
-                        fact_check_writer.writerow(record.as_csv_dict_row())
 
                 appearance = item_reviewed.get("itemReviewed", {}).get("appearance")
 
@@ -87,6 +73,20 @@ def flatten(
                             shared_content_writer=content_writer,
                             fact_check_rating=fact_check_rating,
                         )
+
+            try:
+                record = FactCheck.from_json(
+                    fact_check_rating=fact_check_rating, item=fact_check
+                )
+            except Exception as e:
+                from pprint import pprint
+
+                pprint(fact_check)
+                raise e
+
+            # If no fact-check URL, do not write record to minall-destined CSV file
+            if record.clean_url:
+                fact_check_writer.writerow(record.as_csv_dict_row())
 
 
 def parse_appearance(

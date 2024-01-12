@@ -50,19 +50,11 @@ def rebuild_fact_check_schema(database_export: Dict, fact_check_csv: Path) -> Di
             fact_check_url_index[record.exact_url] = record.to_json()
 
     for fact_check in database_export["data"]:
-        items = fact_check.get("claim-review")
-        for item_reviewed in items:
-            if (
-                item_reviewed
-                and item_reviewed.get("url")
-                and fact_check_url_index.get(item_reviewed["url"])
-            ):
-                item_reviewed.update(
-                    {
-                        "interactionStatistics": fact_check_url_index[
-                            item_reviewed["url"]
-                        ]
-                    }
+        if fact_check and fact_check.get("original-url"):
+            fact_check_url = fact_check["original-url"]
+            if fact_check_url_index.get(fact_check_url):
+                fact_check.update(
+                    {"interactionStatistic": fact_check_url_index[fact_check_url]}
                 )
 
     return database_export

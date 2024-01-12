@@ -29,7 +29,7 @@ class FactCheck(TabularRecord):
 
     @classmethod
     def from_json(cls, fact_check_rating: str, item: Dict) -> "FactCheck":
-        exact_url = item.get("url")
+        exact_url = item.get("original-url")
         clean_url = None
         if exact_url:
             clean_url = exact_url.strip()
@@ -40,7 +40,7 @@ class FactCheck(TabularRecord):
             fact_check_rating=fact_check_rating,
             exact_url=exact_url,
             clean_url=clean_url,
-            date_published=item.get("datePublished"),
+            date_published=item.get("published"),
             facebook_comment=parse_interaction_count(
                 data=item, target_action="Comment", target_service="Facebook"
             ),
