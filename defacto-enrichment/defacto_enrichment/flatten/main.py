@@ -35,6 +35,10 @@ def verify_data(data: List[Dict]):
             keys = i.keys()
             for req in required_keys:
                 assert req in keys
+        except AssertionError as e:
+            print(set(required_keys).difference(i.keys()))
+            raise e
+        try:
             if len(i["claimReviews"]) > 0:
                 for c in i["claimReviews"]:
                     c["itemReviewed"]["appearance"]
