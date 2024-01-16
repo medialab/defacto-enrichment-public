@@ -54,7 +54,7 @@ class Appearance(TabularRecord):
     create_video: Optional[int]
 
     @classmethod
-    def from_json(cls, fact_check_rating: str, item: Dict) -> "Appearance":
+    def from_json(cls, item: Dict, fact_check_rating: str | None = "") -> "Appearance":
         exact_url = item.get("url")
         clean_url = None
         if exact_url:
@@ -71,7 +71,7 @@ class Appearance(TabularRecord):
                 return []
 
         return Appearance(
-            fact_check_rating=fact_check_rating,
+            fact_check_rating=str(fact_check_rating),
             exact_url=exact_url,
             clean_url=clean_url,
             domain=item.get("isPartOf", {}).get("name"),

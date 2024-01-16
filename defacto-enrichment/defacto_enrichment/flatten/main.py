@@ -1,110 +1,157 @@
-import copy
-import csv
 from pathlib import Path
-from typing import Dict, List
+from pprint import pprint
+from statistics import mean
+from typing import Dict, Generator, List, Tuple
 
 from defacto_enrichment.flatten.context import Writers
 from defacto_enrichment.types import Appearance, FactCheck, SharedContent
 
 
-def normalized_fact_checks(data: List[Dict]) -> List[Dict]:
-    normalized_data = copy.deepcopy(data)
+def verify_data(data: List[Dict]):
+    """
+    Verify the schema of the input data matches what's expected.
 
-    # Normalize the value of claim-review to be a List
-    for fact_check in normalized_data:
-        claim_review = fact_check.get("claim-review")
-        if isinstance(claim_review, str):
-            claim_review = []
-        elif isinstance(claim_review, Dict):
-            claim_review = [claim_review]
+    ```
+    [
+        {
+            "id": "<FACT CHECK ID>",
+            "url": "<FACT CHECK URL>",
+            "datePublished": "<FACT CHECK PUBLICATION DATE>",
+            "isBasedOnUrl": "<URL OF FACT CHECK'S ORIGINAL PUBLICATION>",
+            "claimReviews": [
+                {<CLAIM REVIEW 1>},
+                {<CLAIM REVIEW 2>}
+            ]
+        }
+    ]
+    ```
+    """
+
+    required_keys = ["id", "url", "isBasedOnUrl", "datePublished", "claimReviews"]
+
+    for i in data:
+        try:
+            assert isinstance(i["claimReviews"], List)
+            keys = i.keys()
+            for req in required_keys:
+                assert req in keys
+            if len(i["claimReviews"]) > 0:
+                for c in i["claimReviews"]:
+                    c["itemReviewed"]["appearance"]
+        except AssertionError as e:
+            pprint(i)
+            raise e
+
+
+class DataStream:
+    """Class to verify data format and stream parts."""
+
+    def __init__(self, data: List[Dict]) -> None:
+        """Verify the JSON array's schema.
+
+        Args:
+            data (List[Dict]): Array of fact-check articles in ClaimReview schema.
+        """
+        verify_data(data)
+        self.data = data
+
+    def fact_checks(self) -> Generator[Tuple[str | float, Dict], None, None]:
+        """Stream fact-check articles.
+
+        Yields:
+            Generator[Tuple[str, Dict], None, None]: Averaged of article's ratings, Article's data
+        """
+        for fact_check in self.data:
+            target_url = "isBasedOnUrl"
+            if not fact_check[target_url]:
+                continue
+            fact_check_ratings = []
+            for c in fact_check["claimReviews"]:
+                if c.get("reviewRating"):
+                    fact_check_ratings.append(float(c["reviewRating"]["ratingValue"]))
+            if len(fact_check_ratings) > 0:
+                fact_check_rating_average = mean(fact_check_ratings)
+            else:
+                fact_check_rating_average = ""
+            yield fact_check_rating_average, fact_check
+
+    @classmethod
+    def claim_reviews(
+        cls, fact_check: Dict
+    ) -> Generator[Tuple[str, Dict, List | None], None, None]:
+        """Stream fact-check article's reviewed claims.
+
+        Args:
+            fact_check (Dict): Fact-check article's data
+
+        Yields:
+            Generator[Tuple[str, Dict, List | None], None, None]: Reviewed claim's rating, reviewed claim's appearance data, appearance's shared content
+        """
+        for review in fact_check["claimReviews"]:
+            if review.get("itemReviewed") and review["itemReviewed"]["appearance"]:
+                rating = ""
+                if review.get("reviewRating"):
+                    rating = review["reviewRating"]["ratingValue"]
+                for appearance in cls.stream_appearance(review=review):
+                    if appearance:
+                        shared_content = None
+                        if appearance.get("sharedContent"):
+                            shared_content = appearance["sharedContent"]
+                        yield rating, appearance, shared_content
+
+    @classmethod
+    def stream_appearance(cls, review: Dict) -> Generator[Dict | None, None, None]:
+        """Parse and stream appearances in reviewed claim.
+
+        Args:
+            review (Dict): Reviewed claim from fact-check article.
+
+        Yields:
+            Generator[Dict|None, None, None]: Appearance data.
+        """
+        appearances = review["itemReviewed"]["appearance"]
+        if isinstance(appearances, List):
+            for appearance in appearances:
+                yield appearance
         else:
-            claim_review = claim_review
-        fact_check["claim-review"] = claim_review
-
-        if isinstance(claim_review, List):
-            # Normalize the value of appearance in itemReviewed
-            for items in claim_review:
-                item_reviewed = items.get("itemReviewed")
-                if isinstance(item_reviewed, Dict):
-                    appearance = item_reviewed.get("appearance")
-                    if isinstance(appearance, str):
-                        appearance = {"url": appearance.strip()}
-                    else:
-                        appearance = appearance
-                    item_reviewed["appearance"] = appearance
-
-    return normalized_data
+            yield appearances
 
 
 def flatten(
     appearance_file: Path, fact_check_file: Path, content_file: Path, data: List[Dict]
 ):
-    with Writers(appearance_file, content_file, fact_check_file) as context:
-        appearance_writer, content_writer, fact_check_writer, progress = context
+    # Set up the CSV writers, progress bar, and class to stream parsed data
+    with Writers(appearance_file, content_file, fact_check_file) as writers:
+        appearance_writer, content_writer, fact_check_writer, progress = writers
         t = progress.add_task(description="[bold blue]Flatten", total=len(data))
-        for fact_check in data:
-            fact_check_rating = ""
+        data_stream = DataStream(data)
+
+        # Iterate through all the data items
+        for rating_avg, fact_check in data_stream.fact_checks():
             progress.advance(t)
 
-            claim_reviews = fact_check.get("claim-review")
-            if not claim_reviews:
-                continue
+            # Parse and write the fact-check article's information to the CSV
+            fact_check_record = FactCheck.from_json(
+                fact_check_rating=rating_avg, item=fact_check
+            )
+            fact_check_writer.writerow(fact_check_record.as_csv_dict_row())
 
-            for item_reviewed in claim_reviews:
-                fact_check_rating = item_reviewed.get("reviewRating", {}).get(
-                    "ratingValue"
+            # Parse and write the ClaimReview's information to the CSV
+            for rating, claim_review, shared_content in data_stream.claim_reviews(
+                fact_check=fact_check
+            ):
+                appearance_record = Appearance.from_json(
+                    fact_check_rating=rating, item=claim_review
                 )
+                if appearance_record.clean_url:
+                    appearance_writer.writerow(appearance_record.as_csv_dict_row())
 
-                appearance = item_reviewed.get("itemReviewed", {}).get("appearance")
+                    # Parse and write the ItemReviewed's shared content to the CSV
+                    if appearance_record.exact_url and shared_content:
+                        for media in shared_content:
+                            media_record = SharedContent.from_json(
+                                post_url=appearance_record.exact_url, item=media
+                            )
+                            content_writer.writerow(media_record.as_csv_dict_row())
 
-                if isinstance(appearance, Dict):
-                    parse_appearance(
-                        appearance=appearance,
-                        appearance_writer=appearance_writer,
-                        shared_content_writer=content_writer,
-                        fact_check_rating=fact_check_rating,
-                    )
-
-                elif isinstance(appearance, List):
-                    for app in appearance:
-                        parse_appearance(
-                            appearance=app,
-                            appearance_writer=appearance_writer,
-                            shared_content_writer=content_writer,
-                            fact_check_rating=fact_check_rating,
-                        )
-
-            try:
-                record = FactCheck.from_json(
-                    fact_check_rating=fact_check_rating, item=fact_check
-                )
-            except Exception as e:
-                from pprint import pprint
-
-                pprint(fact_check)
-                raise e
-
-            # If no fact-check URL, do not write record to minall-destined CSV file
-            if record.clean_url:
-                fact_check_writer.writerow(record.as_csv_dict_row())
-
-
-def parse_appearance(
-    appearance: Dict,
-    appearance_writer: csv.DictWriter,
-    shared_content_writer: csv.DictWriter,
-    fact_check_rating: str,
-) -> None:
-    appearance_record = Appearance.from_json(
-        fact_check_rating=fact_check_rating, item=appearance
-    )
-    if appearance_record.clean_url and appearance_record.exact_url:
-        appearance_writer.writerow(appearance_record.as_csv_dict_row())
-
-        shared_content = appearance.get("sharedContent")
-        if shared_content:
-            for item in shared_content:
-                shared_content_record = SharedContent.from_json(
-                    item=item, post_url=appearance_record.exact_url
-                )
-                shared_content_writer.writerow(shared_content_record.as_csv_dict_row())
+        progress.update(task_id=t, completed=len(data))

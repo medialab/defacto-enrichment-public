@@ -26,6 +26,8 @@ def parse_input_data() -> Dict | None:
                 if isinstance(database_export, List):
                     database_export = {"data": database_export}
                     return database_export
+                elif isinstance(database_export, Dict) and database_export.get("data"):
+                    return database_export
         elif datafile.suffix == ".xml":
             database_export = rss2json(datafile)
             return database_export

@@ -1,8 +1,12 @@
 from setuptools import find_packages, setup
 
+meta_package = {}
+with open("./defacto_enrichment/__version__.py") as f:
+    exec(f.read(), meta_package)
+
 setup(
     name="defacto-enrichment",
-    version="0.0.2",
+    version=meta_package["__version__"],
     description="Script to manage transformation and enrichment of De Facto data.",
     author="Kelly Christensen",
     keywords="webmining",
@@ -10,7 +14,7 @@ setup(
     python_requires=">=3.11",
     packages=find_packages(exclude=["schemas"]),
     install_requires=[
-        "minall @ git+https://github.com/medialab/minall.git@v0.1.0",
+        "minall @ git+https://github.com/medialab/minall.git@v0.1.2",
         "requests==2.31.0",
     ],
     entry_points={

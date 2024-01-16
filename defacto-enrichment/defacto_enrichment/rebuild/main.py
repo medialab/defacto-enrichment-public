@@ -1,63 +1,79 @@
 import csv
+import json
+import sqlite3
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from sqlite3 import Connection, Cursor
+from typing import Dict, Generator, Type
 
+from defacto_enrichment.flatten.main import DataStream
 from defacto_enrichment.types import Appearance, FactCheck, SharedContent
+from minall.tables.base import BaseTable
 
 
-def rebuild_appearance_schemas(
-    database_export: Dict, appearances_csv: Path, shared_content_csv: Path
-) -> Dict:
-    index_by_url = {}
-    with open(appearances_csv) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            record = Appearance.from_csv_dict_row(row)
-            index_by_url[record.exact_url] = record.to_json()
-
-    with open(shared_content_csv) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            record = SharedContent.from_csv_dict_row(row)
-            index_by_url[record.post_url].update({"sharedContent": record.to_json()})
-
-    for fact_check in database_export["data"]:
-        items = fact_check.get("claim-review")
-        # {"claim-review": [{"itemReviewed": {...}}, {"itemReviewed": {...}}, ...]}
-        for item in items:
-            if isinstance(item, Dict):
-                item_reviewed = item["itemReviewed"]
-                appearance_value = item_reviewed.get("appearance")
-                if isinstance(appearance_value, Dict):
-                    appearance_url = appearance_value.get("url")
-                    if appearance_url and appearance_url in index_by_url:
-                        appearance_value.update(index_by_url[appearance_url])
-                elif isinstance(appearance_value, List):
-                    for appearance in appearance_value:
-                        appearance_url = appearance.get("url")
-                        if appearance_url and appearance_url in index_by_url:
-                            appearance.update(index_by_url[appearance_url])
-
-    return database_export
+@dataclass
+class SharedContentTable:
+    name = "shared_content"
+    pk = ["post_url", "content_url"]
 
 
-def rebuild_fact_check_schema(database_export: Dict, fact_check_csv: Path) -> Dict:
-    fact_check_url_index = {}
-    with open(fact_check_csv) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            record = FactCheck.from_csv_dict_row(row)
-            fact_check_url_index[record.exact_url] = record.to_json()
+@dataclass
+class AppearanceTable:
+    name = "appearance"
+    pk = ["exact_url"]
 
-    for fact_check in database_export["data"]:
-        if fact_check and fact_check.get("original-url"):
-            fact_check_url = fact_check["original-url"]
-            if fact_check_url_index.get(fact_check_url):
-                fact_check.update(
-                    {"interactionStatistic": fact_check_url_index[fact_check_url]}
-                )
 
-    return database_export
+@dataclass
+class FactCheckTable:
+    name = "fact_check"
+    pk = ["exact_url"]
+
+
+class Selector:
+    def __init__(
+        self,
+        table: Type[SharedContentTable | AppearanceTable | FactCheckTable],
+        conn: Connection,
+        infile: Path,
+        outfile=Path(),
+    ) -> None:
+        self.conn = conn
+        with open(infile) as f:
+            reader = csv.DictReader(f)
+            columns = reader.fieldnames
+        if not columns:
+            raise KeyError
+        dtypes = {c: "TEXT" for c in columns}
+        self.pk = getattr(table, "pk")
+        self.table = BaseTable(
+            name=getattr(table, "name"),
+            pk=self.pk,
+            conn=conn,
+            dtypes=dtypes,
+            outfile=outfile,
+        )
+        self.table.update_from_csv(datafile=infile)
+        self.conn.row_factory = self.dict_factory
+
+    def __call__(self, url: str) -> Generator[Dict, None, None]:
+        sql = "SELECT * FROM %s WHERE %s = ?" % (self.table.name, self.pk[0])
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(sql, (url,))
+        except Exception as e:
+            raise e
+        rows = cursor.fetchall()
+        yield from rows
+
+    def dict_factory(self, cursor: Cursor, row) -> Dict:
+        """Convert cursor result to dictionary with column names.
+
+        Solution taken from: https://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
+        """
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
 
 
 def rebuild(
@@ -65,18 +81,50 @@ def rebuild(
     appearances_csv: Path,
     shared_content_csv: Path,
     fact_check_csv: Path,
-):
-    # Mutate the database export with updated appearances
-    rebuild_appearance_schemas(
-        database_export=database_export,
-        appearances_csv=appearances_csv,
-        shared_content_csv=shared_content_csv,
-    )
+) -> Dict:
+    # Set up streamer for JSON data
+    stream = DataStream(data=database_export["data"])
 
-    # Mutate the database export with the fact checks
-    rebuild_fact_check_schema(
-        database_export=database_export, fact_check_csv=fact_check_csv
-    )
+    with sqlite3.connect(":memory:") as conn:
+        fact_check_selector = Selector(
+            table=FactCheckTable, conn=conn, infile=fact_check_csv
+        )
+        appearances_selector = Selector(
+            table=AppearanceTable, conn=conn, infile=appearances_csv
+        )
+        media_selector = Selector(
+            table=SharedContentTable, conn=conn, infile=shared_content_csv
+        )
+
+        # Enrich the fact-check articles
+        for _, fact_check in stream.fact_checks():
+            record = FactCheck.from_json(fact_check)
+            if record.exact_url:
+                match = list(fact_check_selector(record.exact_url))[0]
+                fact_check.update(
+                    {
+                        "interactionStatistic": FactCheck.from_csv_dict_row(
+                            match
+                        ).to_json()
+                    }
+                )
+
+            # Enrich the fact-check article's appearances
+            for _, appearance, _ in stream.claim_reviews(fact_check):
+                record = Appearance.from_json(appearance)
+                if record.exact_url and record.clean_url:
+                    match = list(appearances_selector(record.exact_url))[0]
+                    appearance.update(Appearance.from_csv_dict_row(match).to_json())
+
+                    shared_content = []
+                    for match in media_selector(record.exact_url):
+                        shared_content.append(
+                            SharedContent.from_csv_dict_row(match).to_json()
+                        )
+                    if len(shared_content) > 0:
+                        appearance.update({"sharedContent": shared_content})
+
+    # Return modified JSON object
     return database_export
 
 
