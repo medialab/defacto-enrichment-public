@@ -43,6 +43,7 @@ class Appearance(TabularRecord):
     facebook_share: Optional[int]
     pinterest_share: Optional[int]
     twitter_share: Optional[int]
+    twitter_like: Optional[int]
     tiktok_share: Optional[int]
     tiktok_comment: Optional[int]
     reddit_engagement: Optional[int]
@@ -123,6 +124,9 @@ class Appearance(TabularRecord):
             ),
             twitter_share=parse_interaction_count(
                 data=item, target_action="Share", target_service="Twitter"
+            ),
+            twitter_like=parse_interaction_count(
+                data=item, target_action="Like", target_service="Twitter"
             ),
             tiktok_comment=parse_interaction_count(
                 data=item, target_action="Comment", target_service="TikTok"
@@ -210,6 +214,7 @@ class Appearance(TabularRecord):
             facebook_share=cast_to_int(row["facebook_share"]),
             pinterest_share=cast_to_int(row["pinterest_share"]),
             twitter_share=cast_to_int(row["twitter_share"]),
+            twitter_like=cast_to_int(row["twitter_like"]),
             tiktok_share=cast_to_int(row["tiktok_share"]),
             tiktok_comment=cast_to_int(row["tiktok_comment"]),
             reddit_engagement=cast_to_int(row["reddit_engagement"]),

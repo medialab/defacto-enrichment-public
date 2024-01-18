@@ -1,3 +1,14 @@
+# defacto_enrichment/main.py
+
+"""Module contains class and functions to run the full Defacto-Enrichment workflow.
+
+Exportable modules:
+
+- `App`: Class, which can be initiated with just an output directory and a JSON array, and whose methods can run the entire workflow.
+- `main`: Function that retrieves the JSON data, initializes the Minall class, and calls the workflow's methods.
+
+"""
+
 import copy
 import json
 from pathlib import Path
@@ -13,12 +24,16 @@ from rich.panel import Panel
 
 
 class App:
+    """Intake data, run enrichment, output linked data in 2 CSV files."""
+
     def __init__(
         self,
         json_object: Dict,
         data_dir: Path = DATA_DIR,
     ) -> None:
-        """Initially parse and
+        """Prepare the Minall application.
+
+        Register the original JSON object (not JSON array) and the desired output directory. Parse the data items in the JSON object's key "data." Set up the out-files for the 3 types of linked data: fact-checks, appearances, and appearances' shared content.
 
         Args:
             json_object (Path | None, optional): Path to JSON export of RSS feed. Defaults to None.
@@ -37,7 +52,7 @@ class App:
         self.new_export_json = data_dir.joinpath("enriched-urls.json")
 
     def flatten_export(self):
-        """Flatten JSON data into 3 CSV files."""
+        """Flatten array of fact-check articles into 3 CSV files."""
 
         flatten(
             appearance_file=self.appearance_csv,
@@ -52,7 +67,7 @@ class App:
         with_shared_content_file: bool = True,
         minall_output: Path = MINALL_OUTPUT,
     ):
-        """Enrich flattened CSV files with imported Minall app.
+        """Enrich the flattened CSV files with an instance of the Minall app.
 
         Args:
             config (str | Dict | None, optional): Minet config in YAML file (str), in parsed object (Dict), or in environment variables (None). Defaults to None.
@@ -60,7 +75,6 @@ class App:
             minall_output (Path, optional): Directory for enriched CSV files. Defaults to MINALL_OUTPUT.
         """
 
-        # For testing purposes, adjust presence of shared_content file
         if with_shared_content_file:
             shared_content_file = str(self.shared_content_csv)
         else:
@@ -103,7 +117,7 @@ class App:
         fact_check_file.rename(self.fact_check_csv)
 
     def rebuild_export(self):
-        """Rebuild JSON from enriched CSV files."""
+        """Rebuild the full, original JSON object from data Minall wrote to the enriched CSV files."""
         # Use normalized data when rebuilding
         self.json_data["data"] = self.data_items
         rebuild(
@@ -125,6 +139,7 @@ def print_panel_indicating_file(files: List[Tuple[Path, Path]]):
 
 
 def main():
+    """Main function to intake ClaimReview data and run the enrichment workflow."""
     # Parse input data
     database_export = parse_input_data()
 
