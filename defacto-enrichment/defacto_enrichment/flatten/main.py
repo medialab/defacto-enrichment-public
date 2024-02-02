@@ -72,7 +72,9 @@ class DataStream:
             fact_check_ratings = []
             for c in fact_check["claimReviews"]:
                 if c.get("reviewRating"):
-                    fact_check_ratings.append(float(c["reviewRating"]["ratingValue"]))
+                    rating_value = c["reviewRating"]["ratingValue"]
+                    rating = float(rating_value) if rating_value != "" else None
+                    fact_check_ratings.append(rating)
             if len(fact_check_ratings) > 0:
                 fact_check_rating_average = mean(fact_check_ratings)
             else:
