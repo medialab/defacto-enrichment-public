@@ -74,7 +74,8 @@ class DataStream:
                 if c.get("reviewRating"):
                     rating_value = c["reviewRating"]["ratingValue"]
                     rating = float(rating_value) if rating_value != "" else None
-                    fact_check_ratings.append(rating)
+                    if rating:
+                        fact_check_ratings.append(rating)
             if len(fact_check_ratings) > 0:
                 fact_check_rating_average = mean(fact_check_ratings)
             else:
