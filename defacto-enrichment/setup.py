@@ -14,7 +14,7 @@ setup(
     python_requires=">=3.11",
     packages=find_packages(exclude=["schemas"]),
     install_requires=[
-        "minall @ git+https://github.com/medialab/minall.git@0.2.5",
+        "minall @ git+https://github.com/medialab/minall.git@0.2.6",
         "requests==2.31.0",
     ],
     entry_points={
